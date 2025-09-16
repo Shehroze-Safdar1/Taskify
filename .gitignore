@@ -1,0 +1,73 @@
+# .gitignore for monorepo with .NET, Node, VSCode
+# --- Visual Studio ---
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# --- .NET ---
+bin/
+obj/
+**/*.db
+.vscode/
+!.vscode/settings.json
+*.log
+
+# NuGet
+*.nupkg
+packages/
+
+# --- Rider ---
+.idea/
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-error.log
+dist/
+.build/
+
+# Angular specific
+/.angular
+/.angular/cache
+
+# --- IDE files ---
+.vscode/
+.idea/
+.DS_Store
+
+# logs
+logs
+*.log
+
+# environment files
+.env
+.env.*.local
+
+# SQL Server files
+*.mdf
+*.ldf
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
