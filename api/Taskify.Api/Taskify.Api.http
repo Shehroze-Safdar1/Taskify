@@ -1,6 +1,121 @@
 @Taskify.Api_HostAddress = http://localhost:5255
+@Token = 
 
-GET {{Taskify.Api_HostAddress}}/weatherforecast/
-Accept: application/json
+### Register a new user
+POST {{Taskify.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
 
-###
+{
+  "username": "admin",
+  "email": "admin@taskify.com",
+  "password": "Admin123!",
+  "role": "Admin"
+}
+
+### Register a regular user
+POST {{Taskify.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "user1",
+  "email": "user1@taskify.com",
+  "password": "User123!",
+  "role": "User"
+}
+
+### Login as admin
+POST {{Taskify.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@taskify.com",
+  "password": "Admin123!"
+}
+
+### Login as regular user
+POST {{Taskify.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user1@taskify.com",
+  "password": "User123!"
+}
+
+### Get all tasks (requires authentication)
+GET {{Taskify.Api_HostAddress}}/api/tasks
+Authorization: Bearer {{Token}}
+
+### Get specific task (requires authentication)
+GET {{Taskify.Api_HostAddress}}/api/tasks/1
+Authorization: Bearer {{Token}}
+
+### Create a new task (requires authentication)
+POST {{Taskify.Api_HostAddress}}/api/tasks
+Authorization: Bearer {{Token}}
+Content-Type: application/json
+
+{
+  "title": "Test Task",
+  "description": "This is a test task",
+  "status": "Todo",
+  "priority": "Normal",
+  "dueDate": "2024-12-31T23:59:59Z"
+}
+
+### Update a task (requires authentication)
+PUT {{Taskify.Api_HostAddress}}/api/tasks/1
+Authorization: Bearer {{Token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Task",
+  "description": "This task has been updated",
+  "status": "InProgress",
+  "priority": "High",
+  "dueDate": "2024-12-31T23:59:59Z"
+}
+
+### Delete a task (requires Admin role)
+DELETE {{Taskify.Api_HostAddress}}/api/tasks/1
+Authorization: Bearer {{Token}}
+
+### Test without authentication (should return 401)
+GET {{Taskify.Api_HostAddress}}/api/tasks
+
+### Test with invalid token (should return 401)
+GET {{Taskify.Api_HostAddress}}/api/tasks
+Authorization: Bearer invalid_token_here
+
+### ===== PROJECT ENDPOINTS =====
+
+### Get all projects (requires authentication)
+GET {{Taskify.Api_HostAddress}}/api/projects
+Authorization: Bearer {{Token}}
+
+### Get specific project (requires authentication)
+GET {{Taskify.Api_HostAddress}}/api/projects/1
+Authorization: Bearer {{Token}}
+
+### Create a new project (requires authentication)
+POST {{Taskify.Api_HostAddress}}/api/projects
+Authorization: Bearer {{Token}}
+Content-Type: application/json
+
+{
+  "name": "My New Project",
+  "description": "This is a test project"
+}
+
+### Update a project (requires authentication)
+PUT {{Taskify.Api_HostAddress}}/api/projects/1
+Authorization: Bearer {{Token}}
+Content-Type: application/json
+
+{
+  "name": "Updated Project",
+  "description": "This project has been updated"
+}
+
+### Delete a project (requires authentication - owner or admin)
+DELETE {{Taskify.Api_HostAddress}}/api/projects/1
+Authorization: Bearer {{Token}}

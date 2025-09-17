@@ -1,0 +1,41 @@
+### 🚀 QUICK AUTHENTICATION TEST
+### Use this to quickly test if authentication is working
+
+@baseUrl = http://localhost:5255
+
+### Test 1: Login with existing admin user (Asad Nadeem)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "asad@taskify.com",
+  "password": "YOUR_PASSWORD_HERE"
+}
+
+### Test 1b: If you don't know the password, register a new admin
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testadmin",
+  "email": "testadmin@taskify.com",
+  "password": "TestAdmin123!",
+  "role": "Admin"
+}
+
+### Test 1c: Login with the new admin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testadmin@taskify.com",
+  "password": "TestAdmin123!"
+}
+
+### Test 2: If login works, copy the token and test this endpoint
+### Replace TOKEN_HERE with the token from Test 1
+GET {{baseUrl}}/api/tasks
+Authorization: Bearer TOKEN_HERE
+
+### Test 3: Test without token (should return 401)
+GET {{baseUrl}}/api/tasks

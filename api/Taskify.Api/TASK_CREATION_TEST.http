@@ -1,0 +1,66 @@
+### 🔍 TASK CREATION TEST
+### Use this to test task creation and identify the 500 error
+
+@baseUrl = http://localhost:5255
+
+### Step 1: Login to get token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "asad@taskify.com",
+  "password": "YOUR_PASSWORD_HERE"
+}
+
+### Step 2: Test task creation with minimal data (NO ProjectId)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Test Task"
+}
+
+### Step 3: Test task creation with full data (NO ProjectId)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Complete Test Task",
+  "description": "This is a test task with all fields",
+  "priority": "Normal",
+  "status": "Todo",
+  "dueDate": "2024-12-31T23:59:59Z"
+}
+
+### Step 3b: Test task creation with ProjectId (only if project exists)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": "Task with Project",
+  "description": "This task belongs to a project",
+  "projectId": 1,
+  "priority": "Normal",
+  "status": "Todo"
+}
+
+### Step 4: Test task creation with invalid data (should return 400)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "title": ""
+}
+
+### Step 5: Test task creation without title (should return 400)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "description": "Task without title"
+}

@@ -1,0 +1,245 @@
+### 🎯 COMPLETE CRUD TESTING FOR TASKIFY API
+### Test all Create, Read, Update, Delete operations for Users, Projects, and Tasks
+
+### ===========================================
+### 1. AUTHENTICATION
+### ===========================================
+
+### Login as Admin
+POST https://localhost:7165/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin@taskify.com",
+  "password": "SuperAdmin123!"
+}
+
+### ===========================================
+### 2. USER MANAGEMENT (CRUD)
+### ===========================================
+
+### GET: Get all users (Admin sees all, User sees only themselves)
+GET https://localhost:7165/api/auth/users
+Authorization: Bearer {{token}}
+
+### GET: Get specific user by ID
+GET https://localhost:7165/api/auth/users/1
+Authorization: Bearer {{token}}
+
+### POST: Create new user (Register)
+POST https://localhost:7165/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "TestUser",
+  "email": "testuser@example.com",
+  "password": "TestPassword123!",
+  "role": "User"
+}
+
+### PUT: Update user (Admin can update any, User can update themselves)
+PUT https://localhost:7165/api/auth/users/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "username": "UpdatedUsername",
+  "email": "updated@example.com",
+  "password": "NewPassword123!",
+  "role": "User"
+}
+
+### DELETE: Delete user (Admin only)
+DELETE https://localhost:7165/api/auth/users/1
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 3. PROJECT MANAGEMENT (CRUD)
+### ===========================================
+
+### GET: Get all projects (User sees their own, Admin sees all)
+GET https://localhost:7165/api/projects
+Authorization: Bearer {{token}}
+
+### GET: Get specific project by ID
+GET https://localhost:7165/api/projects/1
+Authorization: Bearer {{token}}
+
+### POST: Create new project
+POST https://localhost:7165/api/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "My New Project",
+  "description": "This is a test project"
+}
+
+### PUT: Update project (Owner or Admin)
+PUT https://localhost:7165/api/projects/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Updated Project Name",
+  "description": "Updated project description"
+}
+
+### DELETE: Delete project (Owner or Admin)
+DELETE https://localhost:7165/api/projects/1
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 4. TASK MANAGEMENT (CRUD)
+### ===========================================
+
+### GET: Get all tasks (User sees their own, Admin sees all)
+GET https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+
+### GET: Get specific task by ID
+GET https://localhost:7165/api/tasks/1
+Authorization: Bearer {{token}}
+
+### POST: Create new task (without project)
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "My New Task",
+  "description": "This is a test task",
+  "status": "Todo",
+  "priority": "Normal",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### POST: Create new task (with project)
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task in Project",
+  "description": "This task belongs to a project",
+  "status": "InProgress",
+  "priority": "High",
+  "dueDate": "2025-12-31T23:59:59Z",
+  "projectId": 1
+}
+
+### PUT: Update task (Owner or Admin)
+PUT https://localhost:7165/api/tasks/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Task Title",
+  "description": "Updated task description",
+  "status": "Done",
+  "priority": "Low",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### DELETE: Delete task (Admin only)
+DELETE https://localhost:7165/api/tasks/1
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 5. TESTING SCENARIOS
+### ===========================================
+
+### Test 1: User tries to access admin-only endpoint
+DELETE https://localhost:7165/api/tasks/1
+Authorization: Bearer {{userToken}}
+
+### Test 2: User tries to update another user's project
+PUT https://localhost:7165/api/projects/2
+Authorization: Bearer {{userToken}}
+Content-Type: application/json
+
+{
+  "name": "Hacked Project",
+  "description": "This should fail"
+}
+
+### Test 3: Create task with invalid project ID
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task with Invalid Project",
+  "description": "This should fail",
+  "projectId": 999
+}
+
+### Test 4: Try to delete last admin user
+DELETE https://localhost:7165/api/auth/users/1
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 6. WORKFLOW TESTING
+### ===========================================
+
+### Step 1: Create a project
+POST https://localhost:7165/api/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Workflow Test Project",
+  "description": "Testing complete workflow"
+}
+
+### Step 2: Create tasks in the project
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task 1 in Project",
+  "description": "First task",
+  "status": "Todo",
+  "priority": "High",
+  "projectId": {{projectId}}
+}
+
+### Step 3: Update the task
+PUT https://localhost:7165/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Task 1",
+  "description": "Updated first task",
+  "status": "InProgress",
+  "priority": "High",
+  "projectId": {{projectId}}
+}
+
+### Step 4: Get project with tasks
+GET https://localhost:7165/api/projects/{{projectId}}
+Authorization: Bearer {{token}}
+
+### Step 5: Complete the task
+PUT https://localhost:7165/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Task 1",
+  "description": "Updated first task",
+  "status": "Done",
+  "priority": "High",
+  "projectId": {{projectId}}
+}
+
+### ===========================================
+### NOTES:
+### ===========================================
+### 1. Replace {{token}} with your actual JWT token
+### 2. Replace {{userToken}} with a regular user's token
+### 3. Replace {{projectId}} and {{taskId}} with actual IDs from responses
+### 4. Test both Admin and User roles
+### 5. All endpoints now support full CRUD operations!
