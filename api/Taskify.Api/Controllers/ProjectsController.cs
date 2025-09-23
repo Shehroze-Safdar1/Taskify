@@ -1,4 +1,4 @@
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -42,6 +42,9 @@ namespace Taskify.Api.Controllers
 
                 var list = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
                 var dto = _mapper.Map<IEnumerable<ProjectDto>>(list);
+
+                await LogActivity(userId, "Viewed projects list", "Project");
+
                 return Ok(dto);
             }
             catch (UnauthorizedAccessException)
@@ -71,6 +74,8 @@ namespace Taskify.Api.Controllers
                 var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
                 if (!isAdmin && project.OwnerId != userId)
                     return NotFound(); // don't reveal existence
+
+                await LogActivity(userId, $"Viewed project {id}", "Project", id);
 
                 return Ok(_mapper.Map<ProjectDto>(project));
             }
@@ -102,6 +107,8 @@ namespace Taskify.Api.Controllers
                 // reload with Owner for mapping
                 await _db.Entry(project).Reference(p => p.Owner).LoadAsync();
 
+                await LogActivity(userId, $"Created project {project.Id}", "Project", project.Id);
+
                 var result = _mapper.Map<ProjectDto>(project);
                 return CreatedAtAction(nameof(GetProject), new { id = project.Id }, result);
             }
@@ -129,10 +136,11 @@ namespace Taskify.Api.Controllers
                 if (!isAdmin && project.OwnerId != userId)
                     return Forbid();
 
-                // map editable fields
                 _mapper.Map(dto, project);
                 _db.Projects.Update(project);
                 await _db.SaveChangesAsync();
+
+                await LogActivity(userId, $"Updated project {id}", "Project", id);
 
                 return NoContent();
             }
@@ -162,6 +170,9 @@ namespace Taskify.Api.Controllers
 
                 _db.Projects.Remove(project);
                 await _db.SaveChangesAsync();
+
+                await LogActivity(userId, $"Deleted project {id}", "Project", id);
+
                 return NoContent();
             }
             catch (Exception ex)
@@ -175,6 +186,22 @@ namespace Taskify.Api.Controllers
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (int.TryParse(idClaim, out var id)) return id;
             throw new UnauthorizedAccessException("Invalid user claim");
+        }
+
+        // 🔹 Reusable logging helper
+        private async Task LogActivity(int userId, string action, string entityType = "", int entityId = 0)
+        {
+            var log = new ActivityLog
+            {
+                UserId = userId,
+                Action = action,
+                EntityType = entityType,
+                EntityId = entityId,
+                Timestamp = DateTime.UtcNow
+            };
+
+            _db.ActivityLogs.Add(log);
+            await _db.SaveChangesAsync();
         }
     }
 }

@@ -1,0 +1,107 @@
+### 🧪 NULL HANDLING TEST
+### Test that null values are properly handled in API responses
+
+### ===========================================
+### 1. Login as Admin
+### ===========================================
+
+### Login as admin
+POST https://localhost:7165/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin@taskify.com",
+  "password": "SuperAdmin123!"
+}
+
+### ===========================================
+### 2. Test Task Creation with No Assignment
+### ===========================================
+
+### Create task without assigned user (should have null AssignedToUserId)
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task Without Assignment",
+  "description": "This task has no assigned user",
+  "status": "Todo",
+  "priority": "Normal",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### ===========================================
+### 3. Test Task Creation with Assignment
+### ===========================================
+
+### Create task with assigned user (should have AssignedToUserId)
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task With Assignment",
+  "description": "This task has an assigned user",
+  "status": "InProgress",
+  "priority": "High",
+  "dueDate": "2025-12-31T23:59:59Z",
+  "assignedToUserId": 2
+}
+
+### ===========================================
+### 4. Test Task Creation with Project
+### ===========================================
+
+### Create task with project (should have ProjectId)
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task With Project",
+  "description": "This task belongs to a project",
+  "status": "Todo",
+  "priority": "Low",
+  "dueDate": "2025-12-31T23:59:59Z",
+  "projectId": 1
+}
+
+### ===========================================
+### 5. Test Task Creation without Project
+### ===========================================
+
+### Create task without project (should have null ProjectId)
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Task Without Project",
+  "description": "This task has no project",
+  "status": "Done",
+  "priority": "Normal",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### ===========================================
+### 6. Verify API Responses
+### ===========================================
+
+### Get all tasks to see how null values are handled
+GET https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+
+### Get specific task to see null handling
+GET https://localhost:7165/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### EXPECTED RESULTS:
+### ===========================================
+### 1. Tasks without assigned users should NOT show "assignedToUserId": null
+### 2. Tasks without assigned users should NOT show "assignedToUsername": null
+### 3. Tasks without projects should NOT show "projectId": null
+### 4. Tasks with assignments should show the assigned user info
+### 5. Tasks with projects should show the project ID
+### 6. Null values should be omitted from JSON responses entirely
