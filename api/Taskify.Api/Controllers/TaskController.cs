@@ -41,6 +41,10 @@ namespace Taskify.Api.Controllers
 
                 var list = await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
                 var dto = _mapper.Map<IEnumerable<TaskDto>>(list);
+
+                // 🔹 Log activity
+                await LogActivity(userId, "Viewed tasks list");
+
                 return Ok(dto);
             }
             catch (UnauthorizedAccessException)
@@ -70,6 +74,9 @@ namespace Taskify.Api.Controllers
                 if (!isAdmin && task.CreatedByUserId != userId)
                     return NotFound(); // don't reveal existence
 
+                // 🔹 Log activity
+                await LogActivity(userId, $"Viewed task {id}");
+
                 return Ok(_mapper.Map<TaskDto>(task));
             }
             catch (UnauthorizedAccessException)
@@ -88,7 +95,6 @@ namespace Taskify.Api.Controllers
         {
             try
             {
-                // Validate input
                 if (dto == null)
                     return BadRequest("Task data is required");
 
@@ -112,13 +118,15 @@ namespace Taskify.Api.Controllers
                 _db.Tasks.Add(task);
                 await _db.SaveChangesAsync();
 
-                // Load the task with the CreatedByUser for proper mapping
                 var createdTask = await _db.Tasks
                     .Include(t => t.CreatedByUser)
                     .FirstOrDefaultAsync(t => t.Id == task.Id);
 
                 if (createdTask == null)
                     return StatusCode(500, "Failed to retrieve created task");
+
+                // 🔹 Log activity
+                await LogActivity(userId, $"Created task {task.Id}");
 
                 var result = _mapper.Map<TaskDto>(createdTask);
                 return CreatedAtAction(nameof(GetTask), new { id = createdTask.Id }, result);
@@ -129,7 +137,6 @@ namespace Taskify.Api.Controllers
             }
             catch (Exception ex)
             {
-                // Log the full exception for debugging
                 Console.WriteLine($"Error creating task: {ex}");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
@@ -149,10 +156,12 @@ namespace Taskify.Api.Controllers
                 if (!isAdmin && task.CreatedByUserId != userId)
                     return Forbid();
 
-                // map editable fields (we map dto onto existing task)
                 _mapper.Map(dto, task);
                 _db.Tasks.Update(task);
                 await _db.SaveChangesAsync();
+
+                // 🔹 Log activity
+                await LogActivity(userId, $"Updated task {id}");
 
                 return NoContent();
             }
@@ -178,6 +187,11 @@ namespace Taskify.Api.Controllers
 
                 _db.Tasks.Remove(task);
                 await _db.SaveChangesAsync();
+
+                // 🔹 Log activity
+                var userId = GetCurrentUserId();
+                await LogActivity(userId, $"Deleted task {id}");
+
                 return NoContent();
             }
             catch (Exception ex)
@@ -191,6 +205,81 @@ namespace Taskify.Api.Controllers
             var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (int.TryParse(idClaim, out var id)) return id;
             throw new UnauthorizedAccessException("Invalid user claim");
+        }
+
+        // POST: api/tasks/{taskId}/tags
+        [HttpPost("{taskId}/tags")]
+        public async Task<IActionResult> AssignTagsToTask(int taskId, [FromBody] List<int> tagIds)
+        {
+            try
+            {
+                var task = await _db.Tasks
+                    .Include(t => t.TaskTags)
+                    .FirstOrDefaultAsync(t => t.Id == taskId);
+
+                if (task == null)
+                    return NotFound();
+
+                var userId = GetCurrentUserId();
+                var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+                if (!isAdmin && task.CreatedByUserId != userId)
+                    return Forbid();
+
+                // Validate that all tag IDs exist
+                if (tagIds != null && tagIds.Any())
+                {
+                    var existingTagIds = await _db.Tags
+                        .Where(t => tagIds.Contains(t.Id))
+                        .Select(t => t.Id)
+                        .ToListAsync();
+
+                    var invalidTagIds = tagIds.Except(existingTagIds).ToList();
+                    if (invalidTagIds.Any())
+                        return BadRequest($"Invalid tag IDs: {string.Join(", ", invalidTagIds)}");
+                }
+
+                // Clear existing tags
+                task.TaskTags.Clear();
+
+                // Add new ones
+                if (tagIds != null && tagIds.Any())
+                {
+                    foreach (var tagId in tagIds)
+                    {
+                        task.TaskTags.Add(new TaskTag { TaskId = taskId, TagId = tagId });
+                    }
+                }
+
+                await _db.SaveChangesAsync();
+
+                // Log activity
+                var tagNames = tagIds != null && tagIds.Any() 
+                    ? string.Join(", ", await _db.Tags.Where(t => tagIds.Contains(t.Id)).Select(t => t.Name).ToListAsync())
+                    : "none";
+                await LogActivity(userId, $"Assigned tags to task {taskId}: {tagNames}");
+
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid user token");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        // 🔹 Shared logging helper
+        private async Task LogActivity(int userId, string action)
+        {
+            _db.ActivityLogs.Add(new ActivityLog
+            {
+                UserId = userId,
+                Action = action,
+                Timestamp = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
         }
     }
 }

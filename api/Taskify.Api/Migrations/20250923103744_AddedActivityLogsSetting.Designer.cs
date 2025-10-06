@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Taskify.Api.Data;
 
@@ -11,9 +12,11 @@ using Taskify.Api.Data;
 namespace Taskify.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923103744_AddedActivityLogsSetting")]
+    partial class AddedActivityLogsSetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,13 +183,13 @@ namespace Taskify.Api.Migrations
 
             modelBuilder.Entity("Taskify.Api.Models.TaskTag", b =>
                 {
-                    b.Property<int>("TaskId")
+                    b.Property<int>("TaskItemId")
                         .HasColumnType("int");
 
                     b.Property<int>("TagId")
                         .HasColumnType("int");
 
-                    b.HasKey("TaskId", "TagId");
+                    b.HasKey("TaskItemId", "TagId");
 
                     b.HasIndex("TagId");
 
@@ -290,15 +293,15 @@ namespace Taskify.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Taskify.Api.Models.TaskItem", "Task")
+                    b.HasOne("Taskify.Api.Models.TaskItem", "TaskItem")
                         .WithMany("TaskTags")
-                        .HasForeignKey("TaskId")
+                        .HasForeignKey("TaskItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Tag");
 
-                    b.Navigation("Task");
+                    b.Navigation("TaskItem");
                 });
 
             modelBuilder.Entity("Taskify.Api.Models.Project", b =>

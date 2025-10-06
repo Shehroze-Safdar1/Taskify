@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Taskify.Api.Data;
 
@@ -11,9 +12,11 @@ using Taskify.Api.Data;
 namespace Taskify.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250923094516_AddActivityLogsTable")]
+    partial class AddActivityLogsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,40 +24,6 @@ namespace Taskify.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Taskify.Api.Models.ActivityLog", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("EntityId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("EntityType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime>("Timestamp")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ActivityLogs", (string)null);
-                });
 
             modelBuilder.Entity("Taskify.Api.Models.Attachment", b =>
                 {
@@ -180,13 +149,13 @@ namespace Taskify.Api.Migrations
 
             modelBuilder.Entity("Taskify.Api.Models.TaskTag", b =>
                 {
-                    b.Property<int>("TaskId")
+                    b.Property<int>("TaskItemId")
                         .HasColumnType("int");
 
                     b.Property<int>("TagId")
                         .HasColumnType("int");
 
-                    b.HasKey("TaskId", "TagId");
+                    b.HasKey("TaskItemId", "TagId");
 
                     b.HasIndex("TagId");
 
@@ -223,17 +192,6 @@ namespace Taskify.Api.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Taskify.Api.Models.ActivityLog", b =>
-                {
-                    b.HasOne("Taskify.Api.Models.Users", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Taskify.Api.Models.Attachment", b =>
@@ -290,15 +248,15 @@ namespace Taskify.Api.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Taskify.Api.Models.TaskItem", "Task")
+                    b.HasOne("Taskify.Api.Models.TaskItem", "TaskItem")
                         .WithMany("TaskTags")
-                        .HasForeignKey("TaskId")
+                        .HasForeignKey("TaskItemId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Tag");
 
-                    b.Navigation("Task");
+                    b.Navigation("TaskItem");
                 });
 
             modelBuilder.Entity("Taskify.Api.Models.Project", b =>

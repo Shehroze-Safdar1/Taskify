@@ -1,0 +1,81 @@
+### Task Tags API Test File
+### Make sure to replace {token} with a valid JWT token from authentication
+
+@baseUrl = https://localhost:7000
+@token = {your-jwt-token-here}
+
+### 1. Get all tags
+GET {{baseUrl}}/api/tags
+Authorization: Bearer {{token}}
+
+### 2. Create a new tag
+POST {{baseUrl}}/api/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Urgent"
+}
+
+### 3. Create another tag
+POST {{baseUrl}}/api/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Bug"
+}
+
+### 4. Create a third tag
+POST {{baseUrl}}/api/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Feature"
+}
+
+### 5. Get all tags again to see the created ones
+GET {{baseUrl}}/api/tags
+Authorization: Bearer {{token}}
+
+### 6. Create a task first (if you don't have one)
+POST {{baseUrl}}/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Test Task with Tags",
+  "description": "This task will be used to test tag assignment",
+  "priority": 1,
+  "status": 0
+}
+
+### 7. Assign tags to a task (replace {taskId} with actual task ID)
+POST {{baseUrl}}/api/tasks/1/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[1, 2, 3]
+
+### 8. Assign different tags to the same task
+POST {{baseUrl}}/api/tasks/1/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[1, 2]
+
+### 9. Remove all tags from a task
+POST {{baseUrl}}/api/tasks/1/tags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+[]
+
+### 10. Delete a tag (only if not assigned to any tasks)
+DELETE {{baseUrl}}/api/tags/3
+Authorization: Bearer {{token}}
+
+### 11. Try to delete a tag that's assigned to tasks (should fail)
+DELETE {{baseUrl}}/api/tags/1
+Authorization: Bearer {{token}}
