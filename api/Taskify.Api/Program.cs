@@ -12,17 +12,32 @@ using Taskify.Api.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
+<<<<<<< HEAD
+=======
+builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
+
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
 // FluentValidation (new style, v11+)
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
+<<<<<<< HEAD
 //Add Activity Logs
 builder.Services.AddScoped<IActivityLogService, ActivityLogService>();
 
 // Add services to the container
 builder.Services.AddControllers();
+=======
+// Add services to the container
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Ignore null values in JSON responses
+        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+    });
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {

@@ -32,16 +32,24 @@ namespace Taskify.Api.Migrations
 
                     b.Property<string>("Action")
                         .IsRequired()
+<<<<<<< HEAD
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+=======
+                        .HasColumnType("nvarchar(max)");
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                     b.Property<int>("EntityId")
                         .HasColumnType("int");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
+<<<<<<< HEAD
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+=======
+                        .HasColumnType("nvarchar(max)");
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
@@ -53,7 +61,11 @@ namespace Taskify.Api.Migrations
 
                     b.HasIndex("UserId");
 
+<<<<<<< HEAD
                     b.ToTable("ActivityLogs", (string)null);
+=======
+                    b.ToTable("ActivityLogs");
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
                 });
 
             modelBuilder.Entity("Taskify.Api.Models.Attachment", b =>
@@ -154,14 +166,24 @@ namespace Taskify.Api.Migrations
                     b.Property<DateTime?>("DueDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Priority")
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
+<<<<<<< HEAD
                     b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+=======
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -230,7 +252,11 @@ namespace Taskify.Api.Migrations
                     b.HasOne("Taskify.Api.Models.Users", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
+<<<<<<< HEAD
                         .OnDelete(DeleteBehavior.Restrict)
+=======
+                        .OnDelete(DeleteBehavior.Cascade)
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
                         .IsRequired();
 
                     b.Navigation("User");

@@ -1,0 +1,127 @@
+### 🧪 ENUM STRING CONVERSION TEST
+### Test that enums are now stored as strings in the database
+
+### ===========================================
+### 1. Login as Admin
+### ===========================================
+
+### Login as admin
+POST https://localhost:7165/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin@taskify.com",
+  "password": "SuperAdmin123!"
+}
+
+### ===========================================
+### 2. Test Task Creation with Enum Strings
+### ===========================================
+
+### Create task with High priority and InProgress status
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Test Enum String Storage",
+  "description": "Testing that enums are stored as strings",
+  "status": "InProgress",
+  "priority": "High",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### Create task with Low priority and Done status
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Another Enum Test",
+  "description": "Testing Low priority and Done status",
+  "status": "Done",
+  "priority": "Low",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### Create task with Normal priority and Todo status
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Normal Priority Task",
+  "description": "Testing Normal priority and Todo status",
+  "status": "Todo",
+  "priority": "Normal",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### ===========================================
+### 3. Test Task Updates with Enum Strings
+### ===========================================
+
+### Update task to change status and priority
+PUT https://localhost:7165/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Updated Enum Test",
+  "description": "Updated task with new enum values",
+  "status": "Done",
+  "priority": "High",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### ===========================================
+### 4. Verify Enum Values in Response
+### ===========================================
+
+### Get all tasks to see enum values in response
+GET https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+
+### Get specific task to see enum values
+GET https://localhost:7165/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+
+### ===========================================
+### 5. Test Invalid Enum Values (Should Fail)
+### ===========================================
+
+### Try to create task with invalid status
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Invalid Status Test",
+  "description": "This should fail",
+  "status": "InvalidStatus",
+  "priority": "High",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### Try to create task with invalid priority
+POST https://localhost:7165/api/tasks
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "title": "Invalid Priority Test",
+  "description": "This should fail",
+  "status": "Todo",
+  "priority": "InvalidPriority",
+  "dueDate": "2025-12-31T23:59:59Z"
+}
+
+### ===========================================
+### EXPECTED RESULTS:
+### ===========================================
+### 1. Tasks should be created successfully with string enum values
+### 2. Database should store "High", "Low", "Normal" for Priority
+### 3. Database should store "Todo", "InProgress", "Done" for Status
+### 4. API responses should show string enum values
+### 5. Invalid enum values should be handled gracefully (fallback to defaults)
+### 6. No more internal server errors related to enum conversion

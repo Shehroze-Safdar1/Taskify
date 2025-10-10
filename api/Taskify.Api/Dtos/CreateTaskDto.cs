@@ -9,6 +9,7 @@ namespace Taskify.Api.Dtos
         public int? ProjectId { get; set; }
         public DateTime? DueDate { get; set; }
         public string? Priority { get; set; } // "Low", "Normal", "High"
-        public string? Status { get; set; } // "Todo", "InProgress", "Done"
+        public string? Status { get; set; }   // "Todo", "InProgress", "Done"
+        public int? AssignedToUserId { get; set; } // 🔹 add this
     }
 }

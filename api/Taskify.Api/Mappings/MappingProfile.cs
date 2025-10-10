@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
-using Taskify.Api.Models;
 using Taskify.Api.Dtos;
+using Taskify.Api.Models;
+using System;
 
 namespace Taskify.Api.Mappings
 {
@@ -10,7 +11,7 @@ namespace Taskify.Api.Mappings
         {
             // User mappings
             CreateMap<CreateUserDto, Users>()
-                .ForMember(d => d.PasswordHash, opt => opt.Ignore()) // hashed later
+                .ForMember(d => d.PasswordHash, opt => opt.Ignore())
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
                 .ForMember(d => d.Projects, opt => opt.Ignore())
                 .ForMember(d => d.CreatedTasks, opt => opt.Ignore())
@@ -23,7 +24,6 @@ namespace Taskify.Api.Mappings
                 .ForMember(d => d.CreatedAt, opt => opt.Ignore())
                 .ForMember(d => d.CreatedByUserId, opt => opt.Ignore())
                 .ForMember(d => d.CreatedByUser, opt => opt.Ignore())
-                .ForMember(d => d.AssignedToUserId, opt => opt.Ignore())
                 .ForMember(d => d.AssignedToUser, opt => opt.Ignore())
                 .ForMember(d => d.TaskTags, opt => opt.Ignore())
                 .ForMember(d => d.Attachments, opt => opt.Ignore())
@@ -33,7 +33,10 @@ namespace Taskify.Api.Mappings
             CreateMap<TaskItem, TaskDto>()
                 .ForMember(d => d.Status, opt => opt.MapFrom(src => src.Status.ToString()))
                 .ForMember(d => d.Priority, opt => opt.MapFrom(src => src.Priority.ToString()))
-                .ForMember(d => d.CreatedByUsername, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.Username : null));
+                .ForMember(d => d.CreatedByUsername, opt => opt.MapFrom(src => src.CreatedByUser != null ? src.CreatedByUser.Username : null))
+                .ForMember(d => d.AssignedToUserId, opt => opt.MapFrom(src => src.AssignedToUserId))
+                .ForMember(d => d.AssignedToUsername, opt => opt.MapFrom(src => src.AssignedToUser != null ? src.AssignedToUser.Username : null))
+                .ForMember(d => d.ProjectId, opt => opt.MapFrom(src => src.ProjectId));
 
             // Project mappings
             CreateMap<CreateProjectDto, Project>()
@@ -47,22 +50,18 @@ namespace Taskify.Api.Mappings
                 .ForMember(d => d.TaskCount, opt => opt.MapFrom(src => src.Tasks != null ? src.Tasks.Count : 0));
         }
 
-        // ✅ Safe enum parser (fallback = Normal)
-        private static Models.TaskPriority ParsePriority(string? value)
+        private static TaskPriority ParsePriority(string? value)
         {
-            if (Enum.TryParse<Models.TaskPriority>(value, true, out var parsed))
+            if (Enum.TryParse<TaskPriority>(value, true, out var parsed))
                 return parsed;
-
-            return Models.TaskPriority.Normal;
+            return TaskPriority.Normal;
         }
 
-        // ✅ Safe enum parser (fallback = Todo)
-        private static Models.TaskStatus ParseStatus(string? value)
+        private static Taskify.Api.Models.TaskStatus ParseStatus(string? value)
         {
-            if (Enum.TryParse<Models.TaskStatus>(value, true, out var parsed))
+            if (Enum.TryParse<Taskify.Api.Models.TaskStatus>(value, true, out var parsed))
                 return parsed;
-
-            return Models.TaskStatus.Todo;
+            return Taskify.Api.Models.TaskStatus.Todo;
         }
     }
 }

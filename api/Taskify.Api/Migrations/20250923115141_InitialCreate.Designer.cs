@@ -12,8 +12,8 @@ using Taskify.Api.Data;
 namespace Taskify.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250917065032_AddUserRole")]
-    partial class AddUserRole
+    [Migration("20250923115141_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,38 @@ namespace Taskify.Api.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Taskify.Api.Models.ActivityLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ActivityLogs");
+                });
 
             modelBuilder.Entity("Taskify.Api.Models.Attachment", b =>
                 {
@@ -118,7 +150,6 @@ namespace Taskify.Api.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("DueDate")
@@ -127,7 +158,7 @@ namespace Taskify.Api.Migrations
                     b.Property<int>("Priority")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProjectId")
+                    b.Property<int?>("ProjectId")
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
@@ -163,13 +194,16 @@ namespace Taskify.Api.Migrations
                     b.ToTable("TaskTags");
                 });
 
-            modelBuilder.Entity("Taskify.Api.Models.User", b =>
+            modelBuilder.Entity("Taskify.Api.Models.Users", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -192,6 +226,17 @@ namespace Taskify.Api.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Taskify.Api.Models.ActivityLog", b =>
+                {
+                    b.HasOne("Taskify.Api.Models.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Taskify.Api.Models.Attachment", b =>
                 {
                     b.HasOne("Taskify.Api.Models.TaskItem", "Task")
@@ -205,7 +250,7 @@ namespace Taskify.Api.Migrations
 
             modelBuilder.Entity("Taskify.Api.Models.Project", b =>
                 {
-                    b.HasOne("Taskify.Api.Models.User", "Owner")
+                    b.HasOne("Taskify.Api.Models.Users", "Owner")
                         .WithMany("Projects")
                         .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -216,12 +261,12 @@ namespace Taskify.Api.Migrations
 
             modelBuilder.Entity("Taskify.Api.Models.TaskItem", b =>
                 {
-                    b.HasOne("Taskify.Api.Models.User", "AssignedToUser")
+                    b.HasOne("Taskify.Api.Models.Users", "AssignedToUser")
                         .WithMany("AssignedTasks")
                         .HasForeignKey("AssignedToUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("Taskify.Api.Models.User", "CreatedByUser")
+                    b.HasOne("Taskify.Api.Models.Users", "CreatedByUser")
                         .WithMany("CreatedTasks")
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -229,9 +274,7 @@ namespace Taskify.Api.Migrations
 
                     b.HasOne("Taskify.Api.Models.Project", "Project")
                         .WithMany("Tasks")
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProjectId");
 
                     b.Navigation("AssignedToUser");
 
@@ -276,7 +319,7 @@ namespace Taskify.Api.Migrations
                     b.Navigation("TaskTags");
                 });
 
-            modelBuilder.Entity("Taskify.Api.Models.User", b =>
+            modelBuilder.Entity("Taskify.Api.Models.Users", b =>
                 {
                     b.Navigation("AssignedTasks");
 

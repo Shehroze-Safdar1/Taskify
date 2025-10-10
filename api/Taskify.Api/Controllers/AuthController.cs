@@ -36,14 +36,22 @@ public class AuthController : ControllerBase
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
             return BadRequest("Email already exists");
 
+<<<<<<< HEAD
         // 🔹 Use AutoMapper to map dto -> entity
+=======
+        // Map DTO → Entity
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
         var user = _mapper.Map<Users>(dto);
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
         _context.Users.Add(user);
         await _context.SaveChangesAsync();
 
+<<<<<<< HEAD
         // ✅ Log with service
+=======
+        // Log activity: EntityType = "User", EntityId = newly created user ID
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
         await _logService.LogAsync("User", user.Id, "Register", user.Id);
 
         return Ok(new { message = "User registered successfully" });
@@ -58,12 +66,104 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid credentials");
 
         var token = GenerateJwtToken(user);
+
+        // Log activity: login action
+        await _logService.LogAsync("User", user.Id, "Login", user.Id);
+
         return Ok(new
         {
             token,
             expiresAt = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_config["Jwt:ExpireMinutes"])),
+<<<<<<< HEAD
             user = _mapper.Map<UserDto>(user) // 🔹 Map entity -> DTO
+=======
+            user = _mapper.Map<UserDto>(user)
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
         });
+    }
+
+    [HttpGet("users")]
+    [Authorize]
+    public async Task<IActionResult> GetUsers()
+    {
+        var userId = GetCurrentUserId();
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+
+        var query = _context.Users.AsQueryable();
+        if (!isAdmin) query = query.Where(u => u.Id == userId);
+
+        var list = await query.OrderByDescending(u => u.CreatedAt).ToListAsync();
+
+        // Log activity: viewing users
+        await _logService.LogAsync("User", 0, "Viewed list", userId);
+
+        return Ok(_mapper.Map<IEnumerable<UserDto>>(list));
+    }
+
+    [HttpGet("users/{id}")]
+    [Authorize]
+    public async Task<IActionResult> GetUser(int id)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        var currentUserId = GetCurrentUserId();
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        if (!isAdmin && user.Id != currentUserId) return Forbid();
+
+        // Log activity: viewing single user
+        await _logService.LogAsync("User", id, "Viewed", currentUserId);
+
+        return Ok(_mapper.Map<UserDto>(user));
+    }
+
+    [HttpPut("users/{id}")]
+    [Authorize]
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] CreateUserDto dto)
+    {
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        var currentUserId = GetCurrentUserId();
+        var isAdmin = User.IsInRole("Admin") || User.IsInRole("admin");
+        if (!isAdmin && user.Id != currentUserId) return Forbid();
+
+        if (dto.Email != user.Email && await _context.Users.AnyAsync(u => u.Email == dto.Email))
+            return BadRequest("Email already exists");
+
+        _mapper.Map(dto, user);
+        if (!string.IsNullOrWhiteSpace(dto.Password))
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+        _context.Users.Update(user);
+        await _context.SaveChangesAsync();
+
+        await _logService.LogAsync("User", id, "Update", currentUserId);
+
+        return NoContent();
+    }
+
+    [HttpDelete("users/{id}")]
+    [Authorize(Roles = "Admin,admin")]
+    public async Task<IActionResult> DeleteUser(int id)
+    {
+        var currentUserId = GetCurrentUserId();
+        var user = await _context.Users.FindAsync(id);
+        if (user == null) return NotFound();
+
+        if (user.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            var adminCount = await _context.Users.CountAsync(u => u.Role == "Admin" || u.Role == "admin");
+            if (adminCount <= 1)
+                return BadRequest("Cannot delete the last admin user");
+        }
+
+        _context.Users.Remove(user);
+        await _context.SaveChangesAsync();
+
+        await _logService.LogAsync("User", id, "Delete", currentUserId);
+
+        return NoContent();
     }
 
     private string GenerateJwtToken(Users user)
@@ -76,7 +176,7 @@ public class AuthController : ControllerBase
             new Claim(ClaimTypes.Role, user.Role)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"] ?? throw new InvalidOperationException("JWT key missing")));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
@@ -90,6 +190,7 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
+<<<<<<< HEAD
     [HttpGet("users")]
     [Authorize]
     public async Task<IActionResult> GetUsers()
@@ -171,6 +272,8 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
+=======
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
     private int GetCurrentUserId()
     {
         var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

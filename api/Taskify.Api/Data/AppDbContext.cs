@@ -13,7 +13,11 @@ namespace Taskify.Api.Data
         public DbSet<Tag> Tags { get; set; }
         public DbSet<TaskTag> TaskTags { get; set; }
         public DbSet<Attachment> Attachments { get; set; }
+<<<<<<< HEAD
         public DbSet<ActivityLog> ActivityLogs { get; set; } // ✅ added
+=======
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,17 +40,18 @@ namespace Taskify.Api.Data
             // Task.CreatedByUser (one-to-many)
             modelBuilder.Entity<TaskItem>()
                 .HasOne(t => t.CreatedByUser)
-                .WithMany(u => u.CreatedTasks)   // add collection in User
+                .WithMany(u => u.CreatedTasks)
                 .HasForeignKey(t => t.CreatedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Task.AssignedToUser (one-to-many)
             modelBuilder.Entity<TaskItem>()
                 .HasOne(t => t.AssignedToUser)
-                .WithMany(u => u.AssignedTasks)  // add collection in User
+                .WithMany(u => u.AssignedTasks)
                 .HasForeignKey(t => t.AssignedToUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+<<<<<<< HEAD
             // ActivityLog configuration
             modelBuilder.Entity<ActivityLog>(entity =>
             {
@@ -70,6 +75,16 @@ namespace Taskify.Api.Data
                       .HasForeignKey(e => e.UserId)
                       .OnDelete(DeleteBehavior.Restrict);
             });
+=======
+            // ✅ Store enums as strings instead of int
+            modelBuilder.Entity<TaskItem>()
+                .Property(t => t.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<TaskItem>()
+                .Property(t => t.Priority)
+                .HasConversion<string>();
+>>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
         }
     }
 }
