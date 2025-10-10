@@ -43,12 +43,7 @@ namespace Taskify.Api.Controllers
                 var list = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
                 var dto = _mapper.Map<IEnumerable<ProjectDto>>(list);
 
-<<<<<<< HEAD
-                // 🔹 Log activity
-                await LogActivity(userId, "Viewed projects list");
-=======
                 await LogActivity(userId, "Viewed projects list", "Project");
->>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                 return Ok(dto);
             }
@@ -80,12 +75,7 @@ namespace Taskify.Api.Controllers
                 if (!isAdmin && project.OwnerId != userId)
                     return NotFound(); // don't reveal existence
 
-<<<<<<< HEAD
-                // 🔹 Log activity
-                await LogActivity(userId, $"Viewed project {id}");
-=======
                 await LogActivity(userId, $"Viewed project {id}", "Project", id);
->>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                 return Ok(_mapper.Map<ProjectDto>(project));
             }
@@ -117,12 +107,7 @@ namespace Taskify.Api.Controllers
                 // reload with Owner for mapping
                 await _db.Entry(project).Reference(p => p.Owner).LoadAsync();
 
-<<<<<<< HEAD
-                // 🔹 Log activity
-                await LogActivity(userId, $"Created project {project.Id}");
-=======
                 await LogActivity(userId, $"Created project {project.Id}", "Project", project.Id);
->>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                 var result = _mapper.Map<ProjectDto>(project);
                 return CreatedAtAction(nameof(GetProject), new { id = project.Id }, result);
@@ -155,12 +140,7 @@ namespace Taskify.Api.Controllers
                 _db.Projects.Update(project);
                 await _db.SaveChangesAsync();
 
-<<<<<<< HEAD
-                // 🔹 Log activity
-                await LogActivity(userId, $"Updated project {id}");
-=======
                 await LogActivity(userId, $"Updated project {id}", "Project", id);
->>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                 return NoContent();
             }
@@ -191,12 +171,7 @@ namespace Taskify.Api.Controllers
                 _db.Projects.Remove(project);
                 await _db.SaveChangesAsync();
 
-<<<<<<< HEAD
-                // 🔹 Log activity
-                await LogActivity(userId, $"Deleted project {id}");
-=======
                 await LogActivity(userId, $"Deleted project {id}", "Project", id);
->>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
 
                 return NoContent();
             }
@@ -213,17 +188,6 @@ namespace Taskify.Api.Controllers
             throw new UnauthorizedAccessException("Invalid user claim");
         }
 
-        // 🔹 Reusable logging helper
-<<<<<<< HEAD
-        private async Task LogActivity(int userId, string action)
-        {
-            _db.ActivityLogs.Add(new ActivityLog
-            {
-                UserId = userId,
-                Action = action,
-                Timestamp = DateTime.UtcNow
-            });
-=======
         private async Task LogActivity(int userId, string action, string entityType = "", int entityId = 0)
         {
             var log = new ActivityLog
@@ -236,7 +200,6 @@ namespace Taskify.Api.Controllers
             };
 
             _db.ActivityLogs.Add(log);
->>>>>>> bade0adab4088872b4a7b8f4325dd25155f790b4
             await _db.SaveChangesAsync();
         }
     }
